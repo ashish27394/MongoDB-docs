@@ -1,0 +1,164 @@
+mongod --dbpath=C:\MongoDB\data\db --logpath=C:\MongoDB\log\log1.txt --install
+net start MongoDB
+
+*for getting status and typing mongo commands		- 		mongo
+*show all dbs 	   									- 		dbs
+*create and swith to new db  						- use [db_name]
+*To know which db we are using currently 			- db
+
+*To create a user 									- db.createUser({
+														user:"brad",
+														pwd:"1234",
+														roles:["readWrite","dbAdmin"]
+													})
+
+*To create a collection(assume as table)              - db.createCollection('<collection_name>');													
+ex - db.createCollection('customers');	
+
+*To Show all collections                             - show collections
+
+*To insert data into the collection                  - db.<collection_name>.insert({field1 : "value1", field2 : "value2"})
+ex- db.customers.insert({first_name:"John", last_name:"Doe"})
+
+*To see all the data in the collection               - db.<collection_name>.find()
+ex- db.customers.find()
+
+*We can insert more than one set at one time like an array and any set can have extra field1
+-db.<collection_name>.insert([{field1:"value1", field2:"value1=2"},{field1:"value1", field2:"value1=2",field3:"value1=3"},{}])
+
+ex- db.customers.insert([{first_name:"Steven",last_name:"Smith"},{first_name:"Joan",last_name:"Johnson",gender:"male"}])
+
+*For displayinng the values in collection clearly and more redable - db.<collection_name>.find().pretty();
+ex - db.customers.find().pretty()
+
+*update
+*To update a field in collection(it will replace everything ,so put everything other also with update field)
+db.customers.update({<where condition>},{<new data fully replaced>})
+
+ex - db.customers.update({first_name:"John"},{first_name:"John",last_name:"Doe",gender:"male"})
+
+*set
+*We can use the set operator with update operator, to update or insert the required
+field for the row   -    db.<collection_name>.update({<where condition>},{$set:{<update field> : <update value>}})
+
+ex - db.customers.update({first_name:"Steven"},{$set:{gender:"male"}});
+
+*Here it will insert gender:male if gender is not there for the Steven and 
+it will update gender:male if gender is there for the Steven
+
+*inc
+*we can incerement a number field by some number using inc
+- db.<collection_name>.update({<where condition>},{$inc :{<update field> : <increment value>}})
+ 
+ex - db.customers.update({first_name : "Steven"},{$inc :{age:5}})
+
+*unset
+*We can remove a field by using unset field - 
+db.<collection_name>.update({<where condition>},{$unset :{<field name> : <any_number>}})
+
+ex - db.customers.update({first_name : "Steven"},{$unset :{age:5}})
+
+*upsert
+*when we try to update a row which does not exist then mongodb will not 
+insert into that by default.
+If we want we can insert if there is no row by using the upsert
+
+-db.<collection_name>.update({<where condition>},{<update field> : <update value>}, {upsert : true})
+
+ex - db.customers.update({first_name : "Mary"},{first_name:"Mary", last_name : "Samson"},{upsert : true})
+
+*rename
+*We can rename a field name using the rename 
+
+-db.<collection_name>.update({<where condition>},{$rename : <curren_propertyname>:<new_propertyname>})
+
+ex - db.customers.update({first_name : "Steven"},{$rename : {"gender":"sex"}})
+
+Here for Steven, gender property will be changed to sex property but value will remain the same
+
+*remove
+*To remove a row
+
+ex - db.customers.remove({first_name : "Steven"});
+
+Here it will delete all Steven it finds
+
+To delete only first Steven, use justOne:true
+
+ex - db.customers.remove({first_name: "Joan"},{justOne:true})
+
+*find
+To find the collection
+
+db.<collection_name>.find({<where condition>})	
+
+*or
+To find in the collection with OR condition
+
+db.<collection_name>.find({$or : [{<first condition>},{second condition}]})
+
+ex - db.customers.find({$or : [{first_name : "Mary"},{first_name : "Joan"}]})
+
+*lt, gt
+lt = less than
+gt = greater than
+lte = less than and equal to
+gte = greater than and equal to
+
+ex - db.customers.find(age:{$lt:40}).pretty()
+
+It will show all the customers with age less than 40
+
+-----------------------
+*property is an object
+
+Suppose we have an address property which is an object which constains
+properties like city,street,state,etc...
+
+Now we can put where condition on city in address like this "address.city"
+
+ex -  db.customers.find({"address.city":"boston"})
+
+"address.city" should be in quote(inverted comma)
+
+----------------------------
+* property is an array
+
+Suppose we have an membership property which is an array
+
+Now you can put condition on any membership array value
+
+ex -  db.customers.find({membership:"mem1"})
+
+Here you will get all members which has "mem1" as one of the values in membership array
+
+----------------------------
+*Sorting
+
+1 = Ascending order
+-1 = Descending order
+
+ex - db.customers.find().sort({last_name:-1}).pretty(); //Descending order
+
+--------------------------
+*Count
+
+ex - db.customers.find().count(); //Returns Number of Rows in collection
+ex -  db.customers.find({gender : "male"}).count();
+
+--------------------------
+*limit
+
+ex - db.customers.find().limit(4);
+
+*Here it will display first four only
+
+ex - db.customers.find().limit(4).sort({first_name : 1});
+
+------------------------------
+*iterartion
+
+ex - db.customers.find().forEach(function(doc){print("Customer Name : "+doc.first_name)});
+
+
+
